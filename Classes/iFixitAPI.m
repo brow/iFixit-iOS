@@ -67,7 +67,7 @@ static int volatile openConnections = 0;
 }
 
 - (void)getSitesWithLimit:(NSUInteger)limit andOffset:(NSUInteger)offset forObject:(id)object withSelector:(SEL)selector {
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/sites?limit=%d&offset=%d", [Config host], limit, offset];
+	NSString *url =	[NSString stringWithFormat:@"http://%@/api/2.0/sites?limit=%d&offset=%d", [Config host], limit, offset];
 	
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -81,7 +81,7 @@ static int volatile openConnections = 0;
 }
 
 - (void)getSiteInfoForObject:(id)object withSelector:(SEL)selector {
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/2.0/info", [Config host]];
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/info", [Config host]];
 	
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -95,7 +95,7 @@ static int volatile openConnections = 0;
 }
 
 - (void)getCollectionsWithLimit:(NSUInteger)limit andOffset:(NSUInteger)offset forObject:(id)object withSelector:(SEL)selector {
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/collections?limit=%d&offset=%d", [Config host], limit, offset];
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/collections?limit=%d&offset=%d", [Config host], limit, offset];
 	
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -109,7 +109,7 @@ static int volatile openConnections = 0;
 }
 
 - (void)getGuide:(NSInteger)guideid forObject:(id)object withSelector:(SEL)selector {
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/guide/%d", [Config host], guideid];
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/guides/%d", [Config host], guideid];
 
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -123,17 +123,14 @@ static int volatile openConnections = 0;
     [request startAsynchronous];
 }
 
-- (void)getCategories:(NSString *)parent forObject:(id)object withSelector:(SEL)selector {
-	if (!parent)
-		parent = @"";
-    
+- (void)getCategoriesForObject:(id)object withSelector:(SEL)selector {
     // On iPhone and iPod touch, only show leaf nodes with viewable guides.
     NSString *requireGuides = @"";
     
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone)
-        requireGuides = @"&requireGuides=yes";
+        requireGuides = @"?requireGuides=yes";
 	
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/categories/%@?censorAppleProducts%@", [Config host], parent, requireGuides];
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/categories%@", [Config host], requireGuides];
 	
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -146,9 +143,9 @@ static int volatile openConnections = 0;
     [request startAsynchronous];
 }
 
-- (void)getTopic:(NSString *)device forObject:(id)object withSelector:(SEL)selector {
-    device = [device stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
-    NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/topic/%@", [Config host], device];	
+- (void)getCategory:(NSString *)category forObject:(id)object withSelector:(SEL)selector {
+    category = [category stringByAddingPercentEscapesUsingEncoding:NSASCIIStringEncoding];
+    NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/categories/%@", [Config host], category];
     
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -162,9 +159,9 @@ static int volatile openConnections = 0;
 }
 
 - (void)getGuides:(NSString *)type forObject:(id)object withSelector:(SEL)selector {
-    int limit = [type isEqual:@"featured"] ? 9 : 100;
+    int limit = 100;
 	
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/guides/%@?limit=%d", [Config host], type, limit];	
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/guides?limit=%d", [Config host], limit];
     
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -179,7 +176,7 @@ static int volatile openConnections = 0;
 
 - (void)getGuidesByIds:(NSArray *)guideids forObject:(id)object withSelector:(SEL)selector {
     NSString *guideidsString = [guideids componentsJoinedByString:@","];
-	NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/guides?guideids=%@", [Config host], guideidsString];
+	NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/guides?guideids=%@", [Config host], guideidsString];
     
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -197,7 +194,7 @@ static int volatile openConnections = 0;
     search = [search stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];
     search = [search stringByReplacingOccurrencesOfString:@"+" withString:@"%2B"];
 	
-    NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/search/%@?filter=device&limit=50&censorAppleProducts", [Config host], search];
+    NSString *url =	[NSString stringWithFormat:@"https://%@/api/2.0/search/%@?filter=category&limit=50", [Config host], search];
 	
     __block ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:url]];
     [request setCompletionBlock:^{
@@ -233,7 +230,7 @@ static int volatile openConnections = 0;
     // .dozuki.com hosts force SSL, so we match that here. Otherwise, for SSO sites with custom domains,
     // SSL doesn't exist so we just use HTTP.
     NSString *s = ([Config currentConfig].sso && [Config currentConfig].custom_domain) ? @"" : @"s";
-    NSString *url =	[NSString stringWithFormat:@"http%@://%@/api/1.0/login", s, [Config host]];	
+    NSString *url =	[NSString stringWithFormat:@"http%@://%@/api/1.0/login", s, [Config host]];
     
     __block ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
     [request setRequestMethod:@"POST"];
@@ -254,9 +251,10 @@ static int volatile openConnections = 0;
 }
 
 - (void)loginWithLogin:(NSString *)login andPassword:(NSString *)password forObject:(id)object withSelector:(SEL)selector {
+    // STOP HERE FOR NOW
     [TestFlight passCheckpoint:@"Login"];
 
-    NSString *url =	[NSString stringWithFormat:@"https://%@/api/1.0/login", [Config host]];	
+    NSString *url =	[NSString stringWithFormat:@"https://%@/api/1.0/login", [Config host]];
 
     __block ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
     if ([Config currentConfig].site == ConfigIFixitDev || [Config currentConfig].site == ConfigMakeDev)
@@ -321,9 +319,10 @@ static int volatile openConnections = 0;
     [GuideBookmarks reset];
 }
 
-- (void)getUserLikesForObject:(id)object withSelector:(SEL)selector {
+- (void)getUserFavoritesForObject:(id)object withSelector:(SEL)selector {
     NSString *url =	[NSString stringWithFormat:@"http://%@/api/1.0/likes", [Config host]];	
     
+    NSLog(@"self user: %@", self.user);
     __block ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];    
     [request setRequestMethod:@"POST"];
     
